@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
-<title>チー娘チャージ</title>
+<title>チーズ牛丼娘</title>
 
 <style>
   *{
@@ -41,14 +41,17 @@
     object-fit:cover;
     object-position:center 35%;
     display:block;
-    transform:scale(1.12);
-    transition:transform 1.2s ease, filter 0.8s ease;
-    will-change:transform, filter;
+    transform:scale(1.08);
+    transition:
+      opacity 0.35s ease,
+      transform 0.9s ease,
+      filter 0.8s ease;
+    will-change:transform, filter, opacity;
   }
 
   #bg.charge-zoom{
-    transform:scale(1.17);
-    filter:brightness(1.04) saturate(1.05);
+    transform:scale(1.14);
+    filter:brightness(1.04) saturate(1.04);
   }
 
   #bgShade{
@@ -66,7 +69,7 @@
 
   #bubbleWrap{
     position:absolute;
-    top:max(20px, env(safe-area-inset-top));
+    top:max(18px, env(safe-area-inset-top));
     left:0;
     width:100%;
     z-index:15;
@@ -122,11 +125,10 @@
     right:0;
     bottom:8px;
     z-index:18;
-    padding:
-      0 14px
-      calc(14px + env(safe-area-inset-bottom));
+    padding:0 14px calc(14px + env(safe-area-inset-bottom));
   }
 
+  #topMenu,
   #choices{
     display:flex;
     flex-direction:column;
@@ -170,6 +172,11 @@
     width:calc(50% - 7px);
   }
 
+  .choice-btn.back{
+    margin-top:2px;
+    background:rgba(120,120,128,0.55);
+  }
+
   .two-col{
     display:flex;
     gap:14px;
@@ -195,22 +202,10 @@
   }
 
   @keyframes flashAnim{
-    0%{
-      opacity:0;
-      transform:scale(0.94);
-    }
-    18%{
-      opacity:1;
-      transform:scale(1);
-    }
-    45%{
-      opacity:0.85;
-      transform:scale(1.05);
-    }
-    100%{
-      opacity:0;
-      transform:scale(1.12);
-    }
+    0%{ opacity:0; transform:scale(0.94); }
+    18%{ opacity:1; transform:scale(1); }
+    45%{ opacity:0.85; transform:scale(1.05); }
+    100%{ opacity:0; transform:scale(1.12); }
   }
 
   #sparkle{
@@ -246,6 +241,10 @@
     0%{ opacity:0; transform:scale(0.8); }
     20%{ opacity:1; transform:scale(1); }
     100%{ opacity:0; transform:scale(1.25); }
+  }
+
+  .hidden{
+    display:none !important;
   }
 
   @media (max-width: 430px){
@@ -285,15 +284,16 @@
 </head>
 <body>
   <div id="app">
-    <img id="bg" src="girl.png" alt="チー娘">
+    <img id="bg" src="girl_top.png" alt="チーズ牛丼娘">
     <div id="bgShade"></div>
 
     <div id="bubbleWrap">
-      <div id="bubble">今日はどんな感じ？</div>
+      <div id="bubble">今日はどうする？</div>
     </div>
 
     <div id="bottomUI">
-      <div id="choices"></div>
+      <div id="topMenu"></div>
+      <div id="choices" class="hidden"></div>
     </div>
 
     <div id="sparkle">
@@ -308,21 +308,71 @@
   </div>
 
 <script>
+  const IMAGES = {
+    top: "girl_top.png",
+    charge: "girl_charge.png",
+    dice: "girl_dice.png",
+    special: "girl_special.png"
+  };
+
+  let currentMode = "top";
   let step = 0;
   let mood = "";
   let detail = "";
 
+  const bgEl = document.getElementById("bg");
   const bubbleEl = document.getElementById("bubble");
+  const topMenuEl = document.getElementById("topMenu");
   const choicesEl = document.getElementById("choices");
   const flashEl = document.getElementById("chargeFlash");
   const sparkleEl = document.getElementById("sparkle");
-  const bgEl = document.getElementById("bg");
+
+  function setImage(src){
+    bgEl.style.opacity = 0.2;
+    setTimeout(() => {
+      bgEl.src = src;
+      bgEl.onload = () => {
+        bgEl.style.opacity = 1;
+      };
+      setTimeout(() => {
+        bgEl.style.opacity = 1;
+      }, 100);
+    }, 120);
+  }
 
   function setMessage(text){
     bubbleEl.textContent = text;
   }
 
-  function renderChoices(list, mode = "single"){
+  function showTopMenu(){
+    topMenuEl.classList.remove("hidden");
+    choicesEl.classList.add("hidden");
+  }
+
+  function showChoices(){
+    topMenuEl.classList.add("hidden");
+    choicesEl.classList.remove("hidden");
+  }
+
+  function renderTopMenu(){
+    topMenuEl.innerHTML = "";
+
+    const buttons = [
+      { label:"チャージ", action: startChargeMode },
+      { label:"サイコロ", action: startDiceMode },
+      { label:"特別", action: startSpecialMode }
+    ];
+
+    buttons.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "choice-btn single";
+      btn.textContent = item.label;
+      btn.onclick = item.action;
+      topMenuEl.appendChild(btn);
+    });
+  }
+
+  function renderChoices(list, mode = "single", includeBack = false){
     choicesEl.innerHTML = "";
 
     if(mode === "two-col"){
@@ -345,16 +395,23 @@
 
         choicesEl.appendChild(row);
       }
-      return;
+    } else {
+      list.forEach(item => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn single";
+        btn.textContent = item.label;
+        btn.onclick = () => next(item.value);
+        choicesEl.appendChild(btn);
+      });
     }
 
-    list.forEach(item => {
-      const btn = document.createElement("button");
-      btn.className = "choice-btn single";
-      btn.textContent = item.label;
-      btn.onclick = () => next(item.value);
-      choicesEl.appendChild(btn);
-    });
+    if(includeBack){
+      const backBtn = document.createElement("button");
+      backBtn.className = "choice-btn single back";
+      backBtn.textContent = "もどる";
+      backBtn.onclick = resetToTop;
+      choicesEl.appendChild(backBtn);
+    }
   }
 
   function playChargeEffect(callback){
@@ -362,9 +419,7 @@
     sparkleEl.classList.remove("on");
     bubbleEl.classList.remove("charge");
     bgEl.classList.remove("charge-zoom");
-
     void flashEl.offsetWidth;
-
     flashEl.classList.add("on");
     sparkleEl.classList.add("on");
     bubbleEl.classList.add("charge");
@@ -379,48 +434,117 @@
     }, 1050);
   }
 
+  function resetToTop(){
+    currentMode = "top";
+    step = 0;
+    mood = "";
+    detail = "";
+    setImage(IMAGES.top);
+    setMessage("今日はどうする？");
+    renderTopMenu();
+    showTopMenu();
+  }
+
+  function startChargeMode(){
+    currentMode = "charge";
+    step = 0;
+    mood = "";
+    detail = "";
+    setImage(IMAGES.charge);
+    setMessage("今日はどんな感じ？");
+    renderChoices([
+      { label:"いい日だった", value:"good" },
+      { label:"ちょっと疲れた", value:"tired" },
+      { label:"落ち込んだ", value:"down" },
+      { label:"なんでもない", value:"neutral" }
+    ], "two-col", true);
+    showChoices();
+  }
+
+  function startDiceMode(){
+    currentMode = "dice";
+    step = 0;
+    setImage(IMAGES.dice);
+    setMessage("サイコロを振る？");
+    renderChoices([
+      { label:"振る", value:"roll" }
+    ], "single", true);
+    showChoices();
+  }
+
+  function startSpecialMode(){
+    currentMode = "special";
+    step = 0;
+    setImage(IMAGES.special);
+    setMessage("特別メニューだよ。\nどれにする？");
+    renderChoices([
+      { label:"誕生日", value:"birthday" },
+      { label:"7色チーズ牛丼", value:"rainbow" }
+    ], "single", true);
+    showChoices();
+  }
+
   function next(choice){
-    if(step === 0){
-      mood = choice;
-
-      if(choice === "good"){
-        setMessage("それはいい日だね。\nどのくらい良かった？");
-        renderChoices([
-          { label:"けっこう良かった", value:"good_high" },
-          { label:"ふつうに良かった", value:"good_mid" },
-          { label:"ちょっとだけ", value:"good_low" }
-        ]);
-      }
-
-      if(choice === "tired"){
-        setMessage("そっか…おつかれさま。\n今はどれに近い？");
-        renderChoices([
-          { label:"かなり疲れた", value:"tired_high" },
-          { label:"少しだけ", value:"tired_mid" },
-          { label:"なんとか大丈夫", value:"tired_low" }
-        ]);
-      }
-
-      if(choice === "down"){
-        setMessage("それはちょっとキツいね。\n今はどんな感じ？");
-        renderChoices([
-          { label:"結構きつい", value:"down_high" },
-          { label:"少しだけ", value:"down_mid" },
-          { label:"もう大丈夫", value:"down_low" }
-        ]);
-      }
-
-      if(choice === "neutral"){
-        setMessage("そっか、来てくれたんだね。\n今日はどれに近い？");
-        renderChoices([
-          { label:"なんとなく", value:"neutral_feel" },
-          { label:"暇だった", value:"neutral_free" },
-          { label:"呼ばれた気がした", value:"neutral_call" }
-        ]);
-      }
-
-      step = 1;
+    if(currentMode === "charge"){
+      nextCharge(choice);
       return;
+    }
+
+    if(currentMode === "dice"){
+      nextDice(choice);
+      return;
+    }
+
+    if(currentMode === "special"){
+      nextSpecial(choice);
+      return;
+    }
+  }
+
+  function nextCharge(choice){
+    if(step === 0){
+      if(choice === "good" || choice === "tired" || choice === "down" || choice === "neutral"){
+        mood = choice;
+
+        if(choice === "good"){
+          setMessage("それはいい日だね。\nどのくらい良かった？");
+          renderChoices([
+            { label:"けっこう良かった", value:"good_high" },
+            { label:"ふつうに良かった", value:"good_mid" },
+            { label:"ちょっとだけ", value:"good_low" }
+          ], "single", true);
+        }
+
+        if(choice === "tired"){
+          setMessage("そっか…おつかれさま。\n今はどれに近い？");
+          renderChoices([
+            { label:"かなり疲れた", value:"tired_high" },
+            { label:"少しだけ", value:"tired_mid" },
+            { label:"なんとか大丈夫", value:"tired_low" }
+          ], "single", true);
+        }
+
+        if(choice === "down"){
+          setMessage("それはちょっとキツいね。\n今はどんな感じ？");
+          renderChoices([
+            { label:"結構きつい", value:"down_high" },
+            { label:"少しだけ", value:"down_mid" },
+            { label:"もう大丈夫", value:"down_low" }
+          ], "single", true);
+        }
+
+        if(choice === "neutral"){
+          setMessage("そっか、来てくれたんだね。\n今日はどれに近い？");
+          renderChoices([
+            { label:"なんとなく", value:"neutral_feel" },
+            { label:"暇だった", value:"neutral_free" },
+            { label:"呼ばれた気がした", value:"neutral_call" }
+          ], "single", true);
+        }
+
+        step = 1;
+        return;
+      }
     }
 
     if(step === 1){
@@ -428,108 +552,176 @@
       setMessage("…じゃあ、ちょっとだけ\nチャージするね");
       renderChoices([
         { label:"受け取る", value:"charge" }
-      ]);
+      ], "single", true);
       step = 2;
       return;
     }
 
-    if(step === 2){
+    if(step === 2 && choice === "charge"){
       choicesEl.innerHTML = "";
       playChargeEffect(() => {
-        setMessage(getFinalMessage());
+        setMessage(getFinalChargeMessage());
         renderChoices([
-          { label:"もう一回", value:"restart" },
-          { label:"シェア", value:"share" },
-          { label:"終わる", value:"end" }
-        ]);
+          { label:"もう一回", value:"restart_charge" },
+          { label:"シェア", value:"share_charge" },
+          { label:"トップへ", value:"top_charge" }
+        ], "single");
         step = 3;
       });
       return;
     }
 
     if(step === 3){
-      if(choice === "restart"){
-        resetApp();
+      if(choice === "restart_charge"){
+        startChargeMode();
         return;
       }
-
-      if(choice === "share"){
-        shareResult();
+      if(choice === "share_charge"){
+        shareText("チーズ牛丼娘でチャージしてきた");
         return;
       }
-
-      if(choice === "end"){
-        setMessage("またね。\nまたチャージしに来てね");
-        choicesEl.innerHTML = "";
+      if(choice === "top_charge"){
+        resetToTop();
       }
     }
   }
 
-  function getFinalMessage(){
+  function getFinalChargeMessage(){
     if(mood === "good"){
-      if(detail === "good_high"){
-        return "ちゃんといい日に\nなってるよ。\nそれ、けっこう大事";
-      }
-      if(detail === "good_mid"){
-        return "いい流れだね。\nそのままで大丈夫";
-      }
+      if(detail === "good_high") return "ちゃんといい日に\nなってるよ。\nそれ、けっこう大事";
+      if(detail === "good_mid") return "いい流れだね。\nそのままで大丈夫";
       return "少しでも良かったなら\n今日はそれで充分だよ";
     }
 
     if(mood === "tired"){
-      if(detail === "tired_high"){
-        return "今日はこれくらいでいいよ。\nまずはちょっと休も";
-      }
-      if(detail === "tired_mid"){
-        return "少し疲れた日は、\n少し休めばいいよ";
-      }
+      if(detail === "tired_high") return "今日はこれくらいでいいよ。\nまずはちょっと休も";
+      if(detail === "tired_mid") return "少し疲れた日は、\n少し休めばいいよ";
       return "まだ大丈夫そうでも、\n少しだけ充電しとこ";
     }
 
     if(mood === "down"){
-      if(detail === "down_high"){
-        return "ちゃんと来ただけでもえらい。\n今日はそれで十分だよ";
-      }
-      if(detail === "down_mid"){
-        return "少し落ち込む日もあるよね。\n今は無理しなくていい";
-      }
+      if(detail === "down_high") return "ちゃんと来ただけでもえらい。\n今日はそれで十分だよ";
+      if(detail === "down_mid") return "少し落ち込む日もあるよね。\n今は無理しなくていい";
       return "もう大丈夫でも、\n少しだけ置いていこう";
     }
 
     if(mood === "neutral"){
-      if(detail === "neutral_feel"){
-        return "なんとなく来た日にも、\nちゃんと意味あるよ";
-      }
-      if(detail === "neutral_free"){
-        return "暇な時間に来てくれたの、\nちょっと嬉しい";
-      }
+      if(detail === "neutral_feel") return "なんとなく来た日にも、\nちゃんと意味あるよ";
+      if(detail === "neutral_free") return "暇な時間に来てくれたの、\nちょっと嬉しい";
       return "呼ばれた気がしたなら、\nたぶん来て正解";
     }
 
     return "少しだけチャージ完了";
   }
 
-  function resetApp(){
-    step = 0;
-    mood = "";
-    detail = "";
+  function nextDice(choice){
+    if(step === 0 && choice === "roll"){
+      choicesEl.innerHTML = "";
+      setMessage("コロコロ…");
+      setTimeout(() => {
+        const results = [
+          "7色チーズ牛丼",
+          "チー…ギュウ",
+          "今日はチャージ強め",
+          "特製いちご増量",
+          "大当たり"
+        ];
+        const result = results[Math.floor(Math.random() * results.length)];
+        setMessage("…出た\n「" + result + "」");
+        renderChoices([
+          { label:"もう一回振る", value:"reroll" },
+          { label:"トップへ", value:"top_dice" }
+        ], "single");
+        step = 1;
+      }, 900);
+      return;
+    }
 
-    setMessage("今日はどんな感じ？");
-    renderChoices([
-      { label:"いい日だった", value:"good" },
-      { label:"ちょっと疲れた", value:"tired" },
-      { label:"落ち込んだ", value:"down" },
-      { label:"なんでもない", value:"neutral" }
-    ], "two-col");
+    if(step === 1){
+      if(choice === "reroll"){
+        startDiceMode();
+        return;
+      }
+      if(choice === "top_dice"){
+        resetToTop();
+      }
+    }
   }
 
-  async function shareResult(){
-    const text = "チー娘チャージしてきた";
+  function nextSpecial(choice){
+    if(step === 0){
+      if(choice === "birthday"){
+        setMessage("今日は誕生日？\nじゃあ、お祝いするね");
+        renderChoices([
+          { label:"ケーキを見る", value:"birthday_show" },
+          { label:"トップへ", value:"top_special" }
+        ], "single");
+        step = 1;
+        return;
+      }
+
+      if(choice === "rainbow"){
+        setMessage("今日は特別に\n7色チーズ牛丼だよ\n…たぶん大丈夫");
+        renderChoices([
+          { label:"受け取る", value:"rainbow_get" },
+          { label:"トップへ", value:"top_special" }
+        ], "single");
+        step = 2;
+        return;
+      }
+    }
+
+    if(step === 1){
+      if(choice === "birthday_show"){
+        setMessage("チー娘お手製ケーキだよ\n残さず食べてね❤️");
+        renderChoices([
+          { label:"ありがとう", value:"birthday_thanks" },
+          { label:"トップへ", value:"top_special" }
+        ], "single");
+        step = 3;
+        return;
+      }
+      if(choice === "top_special"){
+        resetToTop();
+        return;
+      }
+    }
+
+    if(step === 2){
+      if(choice === "rainbow_get"){
+        setMessage("7色チーズ牛丼を\n受け取った");
+        renderChoices([
+          { label:"トップへ", value:"top_special" }
+        ], "single");
+        step = 4;
+        return;
+      }
+      if(choice === "top_special"){
+        resetToTop();
+        return;
+      }
+    }
+
+    if(step === 3){
+      if(choice === "birthday_thanks" || choice === "top_special"){
+        resetToTop();
+      }
+      return;
+    }
+
+    if(step === 4){
+      if(choice === "top_special"){
+        resetToTop();
+      }
+    }
+  }
+
+  async function shareText(text){
     try{
       if(navigator.share){
         await navigator.share({
-          title:"チー娘チャージ",
-          text:text
+          title: "チーズ牛丼娘",
+          text: text
         });
       }else if(navigator.clipboard){
         await navigator.clipboard.writeText(text);
@@ -540,7 +732,7 @@
     }catch(e){}
   }
 
-  resetApp();
+  resetToTop();
 </script>
 </body>
 </html>
