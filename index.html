@@ -13,7 +13,6 @@ body {
   overflow: hidden;
 }
 
-/* ===== 画面共通 ===== */
 .screen {
   display: none;
   position: relative;
@@ -25,7 +24,6 @@ body {
   display: block;
 }
 
-/* ===== 画像 ===== */
 .bg {
   width: 100%;
   height: 100%;
@@ -38,7 +36,6 @@ body {
   to { transform: scale(1.05); }
 }
 
-/* ===== 吹き出し ===== */
 .bubble {
   position: absolute;
   top: 5%;
@@ -50,9 +47,10 @@ body {
   padding: 16px;
   text-align: center;
   font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
-/* 三角（ズラし：60%） */
 .bubble::after {
   content: "";
   position: absolute;
@@ -64,7 +62,6 @@ body {
   border-color: rgba(255,255,255,0.9) transparent transparent transparent;
 }
 
-/* ===== ボタン ===== */
 .buttons {
   position: absolute;
   bottom: 8%;
@@ -79,120 +76,5 @@ button {
   margin: 10px;
   padding: 18px;
   font-size: 18px;
-  border: none;
-  border-radius: 16px;
-  background: rgba(220,200,170,0.9);
-  color: #fff;
-}
-
-button:active {
-  transform: scale(0.96);
-}
-
-.row {
-  display: flex;
-  width: 90%;
-  justify-content: space-between;
-}
-
-.row button {
-  width: 48%;
-}
-</style>
-</head>
-
-<body>
-
-<!-- ===== TOP ===== -->
-<div id="top" class="screen active">
-  <img src="top.jpg" class="bg">
-  <div class="bubble">今日はどうする？</div>
-
-  <div class="buttons">
-    <button onclick="go('charge')">チャージ</button>
-    <button onclick="go('dice')">サイコロ</button>
-    <button onclick="go('special')">特別</button>
-  </div>
-</div>
-
-<!-- ===== チャージ ===== -->
-<div id="charge" class="screen">
-  <img src="charge.jpg" class="bg">
-  <div class="bubble">今日はどんな感じ？</div>
-
-  <div class="buttons">
-    <div class="row">
-      <button>いい日だった</button>
-      <button>ちょっと疲れた</button>
-    </div>
-    <div class="row">
-      <button>落ち込んだ</button>
-      <button>なんでもない</button>
-    </div>
-    <button onclick="go('top')">もどる</button>
-  </div>
-</div>
-
-<!-- ===== サイコロ ===== -->
-<div id="dice" class="screen">
-  <img src="dice.jpg" class="bg">
-  <div id="diceText" class="bubble">サイコロを振る？</div>
-
-  <div class="buttons">
-    <button onclick="roll()">振る</button>
-    <button onclick="go('top')">もどる</button>
-  </div>
-</div>
-
-<!-- ===== サイコロ結果 ===== -->
-<div id="diceResult" class="screen">
-  <img src="dice.jpg" class="bg">
-  <div id="resultText" class="bubble">…</div>
-
-  <div class="buttons">
-    <button onclick="roll()">もう一回振る</button>
-    <button onclick="go('top')">トップへ</button>
-  </div>
-</div>
-
-<!-- ===== 特別 ===== -->
-<div id="special" class="screen">
-  <img src="special.jpg" class="bg">
-  <div class="bubble">特別メニューだよ。どれにする？</div>
-
-  <div class="buttons">
-    <button>誕生日</button>
-    <button>7色チーズ牛丼</button>
-    <button onclick="go('top')">もどる</button>
-  </div>
-</div>
-
-<script>
-function go(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-const results = [
-  "今日はチャージ強め",
-  "今日はゆっくりしよう",
-  "7色チーズ牛丼チャンス",
-  "今日は何も考えない日",
-  "ちょっといいことあるかも"
-];
-
-function roll(){
-  go('diceResult');
-
-  const text = document.getElementById("resultText");
-  text.innerHTML = "コロコロ…";
-
-  setTimeout(()=>{
-    const r = results[Math.floor(Math.random()*results.length)];
-    text.innerHTML = "…出た<br>「" + r + "」";
-  }, 1000);
-}
-</script>
-
-</body>
-</html>
+  font-weight: 600;
+  border
