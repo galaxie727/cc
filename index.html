@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>チー娘チャージ</title>
+
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#000;
+  color:#fff;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+#bg{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center, #222 0%, #000 70%);
+  z-index:-2;
+}
+
+/* 光演出 */
+#chargeEffect{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle, rgba(255,255,255,0.25), transparent 60%);
+  opacity:0;
+  transition:opacity 0.8s;
+  z-index:-1;
+}
+
+#character{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#character img{
+  max-height:60vh;
+}
+
+#message{
+  text-align:center;
+  padding:16px;
+  font-size:18px;
+  min-height:80px;
+  line-height:1.5;
+}
+
+#choices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:12px;
+}
+
+button{
+  padding:14px;
+  font-size:15px;
+  border:none;
+  border-radius:12px;
+  background:#222;
+  color:#fff;
+  transition:0.2s;
+}
+
+button:active{
+  transform:scale(0.95);
+  background:#444;
+}
+
+#footer{
+  text-align:center;
+  font-size:12px;
+  opacity:0.5;
+  padding-bottom:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="bg"></div>
+<div id="chargeEffect"></div>
+
+<div id="character">
+  <!-- ここにチー娘画像 -->
+  <img src="girl.png" alt="チー娘">
+</div>
+
+<div id="message">今日はどんな感じ？</div>
+
+<div id="choices"></div>
+
+<div id="footer">ちょっとチャージする？</div>
+
+<script>
+
+let step = 0;
+let mood = "";
+
+// ボタン描画
+function renderChoices(list){
+  const c = document.getElementById("choices");
+  c.innerHTML = "";
+  list.forEach(text=>{
+    const btn = document.createElement("button");
+    btn.innerText = text;
+    btn.onclick = ()=>next(text);
+    c.appendChild(btn);
+  });
+}
+
+// 次へ
+function next(choice){
+
+  // 初期分岐
+  if(step === 0){
+    mood = choice;
+
+    if(choice === "いい日だった"){
+      setMessage("それはいい日だね");
+      renderChoices(["けっこう良かった","普通","ちょっとだけ"]);
+    }
+
+    if(choice === "ちょっと疲れた"){
+      setMessage("そっか…おつかれさま");
+      renderChoices(["かなり疲れた","少しだけ","なんとか大丈夫"]);
+    }
+
+    if(choice === "落ち込んだ"){
+      setMessage("それはキツいね");
+      renderChoices(["結構きつい","少しだけ","もう大丈夫"]);
+    }
+
+    if(choice === "なんでもない"){
+      setMessage("そっか、来てくれたんだね");
+      renderChoices(["なんとなく","暇だった","呼ばれた気がした"]);
+    }
+
+    step++;
+    return;
+  }
+
+  // チャージ前
+  if(step === 1){
+    setMessage("…じゃあ、ちょっとだけチャージするね");
+    renderChoices(["受け取る"]);
+    step++;
+    return;
+  }
+
+  // チャージ演出
+  if(step === 2){
+    playChargeEffect();
+    setTimeout(()=>{
+      setMessage(getFinalMessage());
+      renderChoices(["もう一回","シェア","終わる"]);
+    },800);
+    step++;
+    return;
+  }
+
+  // リスタート
+  if(choice === "もう一回"){
+    location.reload();
+  }
+
+  // シェア（簡易）
+  if(choice === "シェア"){
+    const text = "チー娘チャージしてきた";
+    navigator.clipboard.writeText(text);
+    alert("コピーしたよ👍");
+  }
+
+  // 終了
+  if(choice === "終わる"){
+    setMessage("またね");
+    document.getElementById("choices").innerHTML = "";
+  }
+}
+
+// メッセージ
+function setMessage(text){
+  document.getElementById("message").innerText = text;
+}
+
+// チャージ演出
+function playChargeEffect(){
+  const e = document.getElementById("chargeEffect");
+  e.style.opacity = 1;
+  setTimeout(()=>{
+    e.style.opacity = 0;
+  },800);
+}
+
+// 最終メッセージ
+function getFinalMessage(){
+
+  if(mood === "いい日だった"){
+    return "いい流れだね。そのままで大丈夫";
+  }
+
+  if(mood === "ちょっと疲れた"){
+    return "今日はこれくらいでいいよ";
+  }
+
+  if(mood === "落ち込んだ"){
+    return "ちゃんと来ただけでもえらい";
+  }
+
+  if(mood === "なんでもない"){
+    return "なんでもない日も、ちゃんと意味あるよ";
+  }
+
+}
+
+// 初期
+renderChoices([
+  "いい日だった",
+  "ちょっと疲れた",
+  "落ち込んだ",
+  "なんでもない"
+]);
+
+</script>
+
+</body>
+</html>
