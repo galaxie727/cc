@@ -48,6 +48,12 @@
     display:block;
     animation:zoom 8s ease-in-out infinite alternate;
     background:#000;
+    transition:transform 0.9s ease, filter 0.6s ease, opacity 0.25s ease;
+  }
+
+  .bg.chargeZoom{
+    transform:scale(1.08);
+    filter:brightness(1.05) saturate(1.05);
   }
 
   @keyframes zoom{
@@ -159,6 +165,25 @@
     background:rgba(176,160,120,0.92);
   }
 
+  .flash{
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at center, rgba(255,245,200,0.55) 0%, rgba(255,235,160,0.18) 30%, rgba(255,255,255,0) 60%);
+    opacity:0;
+    pointer-events:none;
+    z-index:15;
+  }
+
+  .flash.on{
+    animation:flashAnim 0.9s ease-out forwards;
+  }
+
+  @keyframes flashAnim{
+    0%{ opacity:0; transform:scale(0.96); }
+    25%{ opacity:1; transform:scale(1); }
+    100%{ opacity:0; transform:scale(1.08); }
+  }
+
   @media (max-width:430px){
     .bubble{
       top:calc(14px + env(safe-area-inset-top));
@@ -207,35 +232,22 @@
 
   <!-- CHARGE -->
   <section id="charge" class="screen">
-    <img src="girl_charge.png" alt="チャージ画像" class="bg">
+    <img id="chargeBg" src="girl_charge.png" alt="チャージ画像" class="bg">
     <div class="bgShade"></div>
-    <div class="bubble">今日はどんな感じ？</div>
+    <div id="chargeBubble" class="bubble">今日はどんな感じ？</div>
+    <div id="chargeFlash" class="flash"></div>
 
     <div class="bottomArea">
-      <div class="buttons">
+      <div id="chargeButtons" class="buttons">
         <div class="row">
-          <button onclick="showChargeResult('いい日だったね。\nその調子でいこう')">いい日だった</button>
-          <button onclick="showChargeResult('おつかれさま。\n今日は少し休もう')">ちょっと疲れた</button>
+          <button onclick="selectChargeMood('good')">いい日だった</button>
+          <button onclick="selectChargeMood('tired')">ちょっと疲れた</button>
         </div>
         <div class="row">
-          <button onclick="showChargeResult('ちゃんと来ただけでもえらいよ。\n今日は無理しなくていい')">落ち込んだ</button>
-          <button onclick="showChargeResult('なんでもない日も\nちゃんと意味あるよ')">なんでもない</button>
+          <button onclick="selectChargeMood('down')">落ち込んだ</button>
+          <button onclick="selectChargeMood('neutral')">なんでもない</button>
         </div>
-        <button class="back" onclick="goScreen('top')">もどる</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- CHARGE RESULT -->
-  <section id="chargeResult" class="screen">
-    <img src="girl_charge.png" alt="チャージ結果画像" class="bg">
-    <div class="bgShade"></div>
-    <div id="chargeResultBubble" class="bubble">…</div>
-
-    <div class="bottomArea">
-      <div class="buttons">
-        <button onclick="goScreen('charge')">もう一回</button>
-        <button class="back" onclick="goScreen('top')">トップへ</button>
+        <button class="back" onclick="resetCharge()">もどる</button>
       </div>
     </div>
   </section>
@@ -353,9 +365,78 @@
     document.getElementById(id).classList.add('active');
   }
 
-  function showChargeResult(text){
-    document.getElementById('chargeResultBubble').textContent = text;
-    goScreen('chargeResult');
+  const chargeData = {
+    good: {
+      intro: "それはいい日だったね",
+      result: "いい流れだね。\nそのままで大丈夫\n\nちょっとチャージ完了"
+    },
+    tired: {
+      intro: "そっか…おつかれさま",
+      result: "今日はこれくらいでいいよ。\nまずはちょっと休も\n\nちょっとチャージ完了"
+    },
+    down: {
+      intro: "それはちょっとキツいね",
+      result: "ちゃんと来ただけでもえらい。\n今日はそれで十分だよ\n\nちょっとチャージ完了"
+    },
+    neutral: {
+      intro: "そっか、来てくれたんだね",
+      result: "なんでもない日も\nちゃんと意味あるよ\n\nちょっとチャージ完了"
+    }
+  };
+
+  let currentChargeMood = "";
+
+  function resetCharge(){
+    currentChargeMood = "";
+    document.getElementById("chargeBubble").textContent = "今日はどんな感じ？";
+
+    document.getElementById("chargeButtons").innerHTML = `
+      <div class="row">
+        <button onclick="selectChargeMood('good')">いい日だった</button>
+        <button onclick="selectChargeMood('tired')">ちょっと疲れた</button>
+      </div>
+      <div class="row">
+        <button onclick="selectChargeMood('down')">落ち込んだ</button>
+        <button onclick="selectChargeMood('neutral')">なんでもない</button>
+      </div>
+      <button class="back" onclick="resetCharge()">もどる</button>
+    `;
+
+    document.getElementById("chargeBg").classList.remove("chargeZoom");
+    goScreen("charge");
+  }
+
+  function selectChargeMood(mood){
+    currentChargeMood = mood;
+    document.getElementById("chargeBubble").textContent =
+      chargeData[mood].intro + "\n\n…じゃあ、ちょっとだけチャージするね";
+
+    document.getElementById("chargeButtons").innerHTML = `
+      <button onclick="doCharge()">受け取る</button>
+      <button class="back" onclick="resetCharge()">もどる</button>
+    `;
+  }
+
+  function doCharge(){
+    const flash = document.getElementById("chargeFlash");
+    const bg = document.getElementById("chargeBg");
+
+    flash.classList.remove("on");
+    bg.classList.remove("chargeZoom");
+    void flash.offsetWidth;
+
+    flash.classList.add("on");
+    bg.classList.add("chargeZoom");
+
+    setTimeout(() => {
+      document.getElementById("chargeBubble").textContent = chargeData[currentChargeMood].result;
+      document.getElementById("chargeButtons").innerHTML = `
+        <button onclick="resetCharge()">もう一回</button>
+        <button class="back" onclick="goScreen('top')">トップへ</button>
+      `;
+      flash.classList.remove("on");
+      bg.classList.remove("chargeZoom");
+    }, 900);
   }
 
   const diceResults = [
