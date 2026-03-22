@@ -88,7 +88,6 @@
     white-space:pre-line;
   }
 
-  /* 一体感重視の三角 */
   .bubble::after{
     content:"";
     position:absolute;
@@ -215,14 +214,28 @@
     <div class="bottomArea">
       <div class="buttons">
         <div class="row">
-          <button>いい日だった</button>
-          <button>ちょっと疲れた</button>
+          <button onclick="showChargeResult('いい日だったね。\nその調子でいこう')">いい日だった</button>
+          <button onclick="showChargeResult('おつかれさま。\n今日は少し休もう')">ちょっと疲れた</button>
         </div>
         <div class="row">
-          <button>落ち込んだ</button>
-          <button>なんでもない</button>
+          <button onclick="showChargeResult('ちゃんと来ただけでもえらいよ。\n今日は無理しなくていい')">落ち込んだ</button>
+          <button onclick="showChargeResult('なんでもない日も\nちゃんと意味あるよ')">なんでもない</button>
         </div>
         <button class="back" onclick="goScreen('top')">もどる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARGE RESULT -->
+  <section id="chargeResult" class="screen">
+    <img src="girl_charge.png" alt="チャージ結果画像" class="bg">
+    <div class="bgShade"></div>
+    <div id="chargeResultBubble" class="bubble">…</div>
+
+    <div class="bottomArea">
+      <div class="buttons">
+        <button onclick="goScreen('charge')">もう一回</button>
+        <button class="back" onclick="goScreen('top')">トップへ</button>
       </div>
     </div>
   </section>
@@ -259,13 +272,75 @@
   <section id="special" class="screen">
     <img src="girl_special.png" alt="特別画像" class="bg">
     <div class="bgShade"></div>
-    <div class="bubble">特別メニューだよ。\nどれにする？</div>
+    <div class="bubble">特別メニューだよ。
+どれにする？</div>
 
     <div class="bottomArea">
       <div class="buttons">
-        <button>誕生日</button>
-        <button>7色チーズ牛丼</button>
+        <button onclick="goScreen('birthday')">誕生日</button>
+        <button onclick="goScreen('rainbow')">7色チーズ牛丼</button>
         <button class="back" onclick="goScreen('top')">もどる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIRTHDAY -->
+  <section id="birthday" class="screen">
+    <img src="girl_special.png" alt="誕生日画像" class="bg">
+    <div class="bgShade"></div>
+    <div class="bubble">今日は誕生日？
+じゃあ、お祝いするね</div>
+
+    <div class="bottomArea">
+      <div class="buttons">
+        <button onclick="goScreen('birthdayCake')">ケーキを見る</button>
+        <button class="back" onclick="goScreen('special')">もどる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIRTHDAY CAKE -->
+  <section id="birthdayCake" class="screen">
+    <img src="girl_special.png" alt="誕生日ケーキ画像" class="bg">
+    <div class="bgShade"></div>
+    <div class="bubble">チー娘お手製ケーキだよ
+残さず食べてね❤️</div>
+
+    <div class="bottomArea">
+      <div class="buttons">
+        <button onclick="goScreen('special')">ありがとう</button>
+        <button class="back" onclick="goScreen('top')">トップへ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RAINBOW -->
+  <section id="rainbow" class="screen">
+    <img src="girl_special.png" alt="7色チーズ牛丼画像" class="bg">
+    <div class="bgShade"></div>
+    <div class="bubble">今日は特別に
+7色チーズ牛丼だよ
+…たぶん大丈夫</div>
+
+    <div class="bottomArea">
+      <div class="buttons">
+        <button onclick="goScreen('rainbowResult')">受け取る</button>
+        <button class="back" onclick="goScreen('special')">もどる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RAINBOW RESULT -->
+  <section id="rainbowResult" class="screen">
+    <img src="girl_special.png" alt="7色チーズ牛丼結果画像" class="bg">
+    <div class="bgShade"></div>
+    <div class="bubble">7色チーズ牛丼を
+受け取った</div>
+
+    <div class="bottomArea">
+      <div class="buttons">
+        <button onclick="goScreen('special')">特別メニューへ</button>
+        <button class="back" onclick="goScreen('top')">トップへ</button>
       </div>
     </div>
   </section>
@@ -276,6 +351,11 @@
       screen.classList.remove('active');
     });
     document.getElementById(id).classList.add('active');
+  }
+
+  function showChargeResult(text){
+    document.getElementById('chargeResultBubble').textContent = text;
+    goScreen('chargeResult');
   }
 
   const diceResults = [
@@ -291,11 +371,11 @@
   function rollDice(){
     goScreen('diceResult');
     const bubble = document.getElementById('resultBubble');
-    bubble.innerHTML = "コロコロ…";
+    bubble.textContent = "コロコロ…";
 
     setTimeout(() => {
       const result = diceResults[Math.floor(Math.random() * diceResults.length)];
-      bubble.innerHTML = "…出た\n「" + result + "」";
+      bubble.textContent = "…出た\n「" + result + "」";
     }, 900);
   }
 </script>
