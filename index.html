@@ -18,164 +18,93 @@
     height:100%;
     background:#000;
     font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
-    overflow:hidden;
     color:#fff;
+    overflow:hidden;
   }
 
   body{
-    position:relative;
+    background:#000;
   }
 
   #app{
-    position:relative;
     width:100vw;
     height:100vh;
+    display:flex;
+    flex-direction:column;
+    background:#000;
+  }
+
+  /* 上：画像エリア */
+  #visual{
+    position:relative;
+    flex:0 0 58vh;
+    min-height:320px;
     overflow:hidden;
     background:#000;
   }
 
-  /* 背景キャラ全画面 */
-  #character{
-    position:absolute;
-    inset:0;
-    overflow:hidden;
-    background:#000;
-  }
-
-  #character img{
-    position:absolute;
-    inset:0;
+  #visual img{
     width:100%;
     height:100%;
     object-fit:cover;
     object-position:center center;
-    transform:scale(1.03);
-    user-select:none;
-    -webkit-user-drag:none;
-    pointer-events:none;
+    display:block;
+    transform:scale(1.02);
   }
 
-  /* 上下の見やすさ調整 */
-  #character::before{
+  #visual::after{
     content:"";
     position:absolute;
     inset:0;
-    background:
-      linear-gradient(to bottom,
-        rgba(0,0,0,0.60) 0%,
-        rgba(0,0,0,0.10) 18%,
-        rgba(0,0,0,0.00) 34%,
-        rgba(0,0,0,0.00) 58%,
-        rgba(0,0,0,0.30) 72%,
-        rgba(0,0,0,0.72) 86%,
-        rgba(0,0,0,0.92) 100%);
-    z-index:1;
+    background:linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.18) 0%,
+      rgba(0,0,0,0.00) 45%,
+      rgba(0,0,0,0.35) 78%,
+      rgba(0,0,0,0.72) 100%
+    );
     pointer-events:none;
   }
 
-  /* ほんのり下から光 */
-  #character::after{
-    content:"";
-    position:absolute;
-    left:50%;
-    bottom:-8vh;
-    transform:translateX(-50%);
-    width:120vw;
-    height:36vh;
-    background:radial-gradient(circle, rgba(255,220,120,0.18) 0%, rgba(255,220,120,0.08) 28%, rgba(255,220,120,0) 72%);
-    z-index:1;
-    pointer-events:none;
-    filter:blur(10px);
-  }
-
-  /* チャージ演出 */
-  #chargeFlash{
-    position:absolute;
-    inset:0;
-    background:
-      radial-gradient(circle at 50% 48%, rgba(255,240,180,0.55) 0%, rgba(255,230,140,0.28) 20%, rgba(255,220,120,0.12) 35%, rgba(255,255,255,0) 62%);
-    opacity:0;
-    pointer-events:none;
-    z-index:3;
-  }
-
-  #chargeFlash.on{
-    animation:chargeFlashAnim 1s ease-out forwards;
-  }
-
-  @keyframes chargeFlashAnim{
-    0%   { opacity:0; transform:scale(0.96); }
-    18%  { opacity:0.95; transform:scale(1.00); }
-    55%  { opacity:0.55; transform:scale(1.03); }
-    100% { opacity:0; transform:scale(1.06); }
-  }
-
-  /* UI全体 */
-  #ui{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    z-index:5;
-    padding:
-      max(14px, env(safe-area-inset-top))
-      16px
-      max(18px, env(safe-area-inset-bottom))
-      16px;
-  }
-
-  /* 上部ラベル */
   #sitePill{
     position:absolute;
     top:max(12px, env(safe-area-inset-top));
     left:50%;
     transform:translateX(-50%);
-    min-width:180px;
-    max-width:70vw;
     padding:10px 18px;
     border-radius:999px;
-    text-align:center;
-    font-size:16px;
-    line-height:1;
-    color:#f7f7f7;
-    background:rgba(94,84,0,0.72);
-    border:1px solid rgba(255,235,120,0.16);
-    box-shadow:
-      0 4px 16px rgba(0,0,0,0.35),
-      inset 0 0 8px rgba(255,255,140,0.08);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    font-size:15px;
+    color:#fff;
+    background:rgba(118,104,10,0.72);
+    border:1px solid rgba(255,230,120,0.16);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    z-index:2;
     white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    z-index:6;
   }
 
-  /* 下部パネル */
-  #bottomPanel{
-    width:100%;
-    padding:10px 2px 0;
-  }
-
-  #messageWrap{
-    min-height:108px;
+  /* 下：UIエリア */
+  #panel{
+    flex:1;
     display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:0 8px;
-    margin-bottom:18px;
+    flex-direction:column;
+    justify-content:flex-start;
+    padding:18px 16px calc(16px + env(safe-area-inset-bottom));
+    background:
+      radial-gradient(circle at top center, rgba(255,220,120,0.10) 0%, rgba(255,220,120,0.00) 35%),
+      #000;
   }
 
   #message{
-    font-size:clamp(24px, 4vw, 36px);
-    line-height:1.55;
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     text-align:center;
-    color:#fff;
-    text-shadow:
-      0 2px 8px rgba(0,0,0,0.7),
-      0 0 24px rgba(0,0,0,0.32);
-    letter-spacing:0.02em;
+    font-size:clamp(24px, 4vw, 34px);
+    line-height:1.45;
+    margin-bottom:16px;
+    text-shadow:0 2px 10px rgba(0,0,0,0.55);
     white-space:pre-line;
   }
 
@@ -183,39 +112,27 @@
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:14px;
-    width:100%;
   }
 
   .choice-btn{
     appearance:none;
     -webkit-appearance:none;
     border:none;
-    outline:none;
-    min-height:72px;
-    border-radius:20px;
-    background:rgba(35,35,38,0.88);
+    border-radius:18px;
+    min-height:68px;
+    background:rgba(34,34,38,0.95);
     color:#fff;
-    font-size:18px;
+    font-size:17px;
     font-weight:500;
-    letter-spacing:0.02em;
     box-shadow:
-      0 8px 24px rgba(0,0,0,0.32),
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      inset 0 -1px 0 rgba(0,0,0,0.35);
-    transition:
-      transform 0.10s ease,
-      filter 0.15s ease,
-      background 0.15s ease,
-      box-shadow 0.15s ease;
+      0 6px 18px rgba(0,0,0,0.30),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+    transition:transform 0.10s ease, background 0.15s ease;
   }
 
   .choice-btn:active{
     transform:scale(0.97);
-    background:rgba(58,58,64,0.96);
-    box-shadow:
-      0 4px 12px rgba(0,0,0,0.28),
-      inset 0 1px 0 rgba(255,255,255,0.06),
-      inset 0 0 0 1px rgba(255,255,255,0.02);
+    background:rgba(54,54,60,1);
   }
 
   .choice-btn.single{
@@ -223,63 +140,70 @@
   }
 
   .choice-btn.share{
-    background:rgba(52,52,58,0.94);
+    background:rgba(48,48,54,0.96);
   }
 
   #footerText{
-    margin-top:18px;
+    margin-top:16px;
     text-align:center;
-    font-size:16px;
-    color:rgba(255,255,255,0.82);
-    text-shadow:0 2px 8px rgba(0,0,0,0.65);
-    letter-spacing:0.03em;
+    font-size:15px;
+    color:rgba(255,255,255,0.80);
   }
 
-  .hidden{
-    display:none !important;
+  #chargeFlash{
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(circle at center, rgba(255,240,180,0.55) 0%, rgba(255,220,120,0.18) 26%, rgba(255,255,255,0) 56%);
+    opacity:0;
+    pointer-events:none;
+    z-index:20;
   }
 
-  @media (max-width: 390px){
+  #chargeFlash.on{
+    animation:flashAnim 0.9s ease-out forwards;
+  }
+
+  @keyframes flashAnim{
+    0%{opacity:0; transform:scale(0.96);}
+    18%{opacity:0.95; transform:scale(1);}
+    100%{opacity:0; transform:scale(1.06);}
+  }
+
+  @media (max-width:390px){
+    #visual{
+      flex-basis:54vh;
+      min-height:280px;
+    }
+
     #message{
       font-size:22px;
+      min-height:64px;
+      margin-bottom:14px;
     }
 
     .choice-btn{
-      min-height:66px;
-      font-size:17px;
-      border-radius:18px;
-    }
-
-    #footerText{
-      font-size:15px;
+      min-height:64px;
+      font-size:16px;
     }
   }
 </style>
 </head>
-
 <body>
   <div id="app">
-    <div id="character">
-      <!-- 画像ファイル名は必要に応じて変更 -->
-      <img src="girl.png" alt="チー娘" />
+    <div id="visual">
+      <img src="girl.png" alt="チー娘">
+      <div id="sitePill">galaxie727.github.io</div>
     </div>
 
-    <div id="chargeFlash"></div>
-
-    <div id="sitePill">galaxie727.github.io</div>
-
-    <div id="ui">
-      <div id="bottomPanel">
-        <div id="messageWrap">
-          <div id="message">今日はどんな感じ？</div>
-        </div>
-
-        <div id="choices"></div>
-
-        <div id="footerText">ちょっとチャージする？</div>
-      </div>
+    <div id="panel">
+      <div id="message">今日はどんな感じ？</div>
+      <div id="choices"></div>
+      <div id="footerText">ちょっとチャージする？</div>
     </div>
   </div>
+
+  <div id="chargeFlash"></div>
 
 <script>
   let step = 0;
@@ -305,12 +229,10 @@
     list.forEach(item => {
       const btn = document.createElement("button");
       btn.className = "choice-btn";
-      btn.textContent = item.label;
-
       if(item.single) btn.classList.add("single");
       if(item.className) btn.classList.add(item.className);
-
-      btn.addEventListener("click", () => next(item.value));
+      btn.textContent = item.label;
+      btn.onclick = () => next(item.value);
       choicesEl.appendChild(btn);
     });
   }
@@ -323,7 +245,7 @@
     setTimeout(() => {
       chargeFlashEl.classList.remove("on");
       if(callback) callback();
-    }, 1000);
+    }, 900);
   }
 
   function next(choice){
@@ -336,7 +258,7 @@
         renderChoices([
           { label:"けっこう良かった", value:"good_high" },
           { label:"ふつうに良かった", value:"good_mid" },
-          { label:"ちょっとだけ", value:"good_low" }
+          { label:"ちょっとだけ", value:"good_low", single:true }
         ]);
       }
 
@@ -346,7 +268,7 @@
         renderChoices([
           { label:"かなり疲れた", value:"tired_high" },
           { label:"少しだけ", value:"tired_mid" },
-          { label:"なんとか大丈夫", value:"tired_low" }
+          { label:"なんとか大丈夫", value:"tired_low", single:true }
         ]);
       }
 
@@ -356,7 +278,7 @@
         renderChoices([
           { label:"結構きつい", value:"down_high" },
           { label:"少しだけ", value:"down_mid" },
-          { label:"もう大丈夫", value:"down_low" }
+          { label:"もう大丈夫", value:"down_low", single:true }
         ]);
       }
 
@@ -366,7 +288,7 @@
         renderChoices([
           { label:"なんとなく", value:"neutral_feel" },
           { label:"暇だった", value:"neutral_free" },
-          { label:"呼ばれた気がした", value:"neutral_call" }
+          { label:"呼ばれた気がした", value:"neutral_call", single:true }
         ]);
       }
 
@@ -468,8 +390,8 @@
     try{
       if(navigator.share){
         await navigator.share({
-          title: "チー娘チャージ",
-          text: text
+          title:"チー娘チャージ",
+          text:text
         });
       }else if(navigator.clipboard){
         await navigator.clipboard.writeText(text);
@@ -477,9 +399,7 @@
       }else{
         alert(text);
       }
-    }catch(e){
-      /* キャンセル時は何もしない */
-    }
+    }catch(e){}
   }
 
   resetApp();
