@@ -39,8 +39,16 @@
     width:100%;
     height:100%;
     object-fit:cover;
-    object-position:center center;
+    object-position:center 35%;
     display:block;
+    transform:scale(1.12);
+    transition:transform 1.2s ease, filter 0.8s ease;
+    will-change:transform, filter;
+  }
+
+  #bg.charge-zoom{
+    transform:scale(1.17);
+    filter:brightness(1.04) saturate(1.05);
   }
 
   #bgShade{
@@ -50,19 +58,19 @@
       linear-gradient(to bottom,
         rgba(255,255,255,0.04) 0%,
         rgba(255,255,255,0.00) 34%,
-        rgba(0,0,0,0.07) 72%,
-        rgba(0,0,0,0.16) 100%);
+        rgba(0,0,0,0.08) 72%,
+        rgba(0,0,0,0.18) 100%);
     pointer-events:none;
+    z-index:1;
   }
 
-  /* 吹き出し */
   #bubbleWrap{
     position:absolute;
     top:max(20px, env(safe-area-inset-top));
     left:0;
     width:100%;
     z-index:15;
-    padding:0 18px;
+    padding:0 12px;
     display:flex;
     justify-content:center;
     pointer-events:none;
@@ -71,15 +79,19 @@
   #bubble{
     position:relative;
     width:min(720px, 100%);
-    background:rgba(255,255,255,0.93);
+    background:rgba(255,255,255,0.88);
     color:#111;
     border-radius:26px;
-    padding:24px 22px;
+    padding:22px 18px;
     text-align:center;
     font-size:clamp(20px, 4vw, 28px);
+    font-weight:600;
     line-height:1.45;
     box-shadow:0 8px 26px rgba(0,0,0,0.14);
     white-space:pre-line;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:transform 0.25s ease, opacity 0.25s ease;
   }
 
   #bubble::after{
@@ -87,23 +99,32 @@
     position:absolute;
     left:50%;
     transform:translateX(-50%) rotate(45deg);
-    bottom:-8px;
-    width:18px;
-    height:18px;
-    background:rgba(255,255,255,0.93);
-    box-shadow:2px 2px 8px rgba(0,0,0,0.04);
+    bottom:-6px;
+    width:16px;
+    height:16px;
+    background:rgba(255,255,255,0.88);
+    box-shadow:2px 2px 8px rgba(0,0,0,0.03);
   }
 
-  /* 下部UI */
+  #bubble.charge{
+    animation:bubblePulse 0.9s ease-out;
+  }
+
+  @keyframes bubblePulse{
+    0%{transform:scale(1);}
+    20%{transform:scale(1.015);}
+    100%{transform:scale(1);}
+  }
+
   #bottomUI{
     position:absolute;
     left:0;
     right:0;
-    bottom:0;
+    bottom:8px;
     z-index:18;
     padding:
-      0 18px
-      calc(16px + env(safe-area-inset-bottom));
+      0 14px
+      calc(14px + env(safe-area-inset-bottom));
   }
 
   #choices{
@@ -114,29 +135,35 @@
 
   .choice-btn{
     width:100%;
-    min-height:72px;
+    min-height:66px;
     border:none;
-    border-radius:22px;
+    border-radius:20px;
     background:rgba(214,206,206,0.62);
     color:#fff;
-    font-size:clamp(19px, 4vw, 23px);
-    font-weight:500;
+    font-size:clamp(18px, 4vw, 22px);
+    font-weight:600;
     letter-spacing:0.02em;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.24),
       0 8px 24px rgba(0,0,0,0.10);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
-    transition:transform 0.10s ease, background 0.15s ease;
+    transition:
+      transform 0.10s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
   .choice-btn:active{
     transform:scale(0.98);
     background:rgba(196,188,188,0.78);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.18),
+      0 4px 12px rgba(0,0,0,0.10);
   }
 
   .choice-btn.single{
-    min-height:74px;
+    min-height:68px;
   }
 
   .choice-btn.row-half{
@@ -153,23 +180,72 @@
     inset:0;
     background:
       radial-gradient(circle at center,
-        rgba(255,255,255,0.68) 0%,
-        rgba(255,244,190,0.44) 18%,
-        rgba(255,230,140,0.18) 32%,
-        rgba(255,255,255,0) 58%);
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,248,210,0.18) 16%,
+        rgba(255,238,165,0.32) 28%,
+        rgba(255,230,140,0.16) 42%,
+        rgba(255,255,255,0.00) 62%);
     opacity:0;
     pointer-events:none;
     z-index:30;
   }
 
   #chargeFlash.on{
-    animation:flashAnim 0.9s ease-out forwards;
+    animation:flashAnim 1.05s ease-out forwards;
   }
 
   @keyframes flashAnim{
-    0%{opacity:0; transform:scale(0.96);}
-    18%{opacity:1; transform:scale(1);}
-    100%{opacity:0; transform:scale(1.06);}
+    0%{
+      opacity:0;
+      transform:scale(0.94);
+    }
+    18%{
+      opacity:1;
+      transform:scale(1);
+    }
+    45%{
+      opacity:0.85;
+      transform:scale(1.05);
+    }
+    100%{
+      opacity:0;
+      transform:scale(1.12);
+    }
+  }
+
+  #sparkle{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:29;
+    opacity:0;
+  }
+
+  #sparkle.on{
+    animation:sparkleAnim 1.05s ease-out forwards;
+  }
+
+  .spark{
+    position:absolute;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:rgba(255,245,210,0.95);
+    box-shadow:
+      0 0 12px rgba(255,240,180,0.85),
+      0 0 24px rgba(255,230,140,0.48);
+  }
+
+  .spark.s1{ left:22%; top:58%; }
+  .spark.s2{ left:36%; top:42%; width:8px; height:8px; }
+  .spark.s3{ left:50%; top:50%; width:12px; height:12px; }
+  .spark.s4{ left:64%; top:40%; width:8px; height:8px; }
+  .spark.s5{ left:74%; top:57%; width:10px; height:10px; }
+
+  @keyframes sparkleAnim{
+    0%{ opacity:0; transform:scale(0.8); }
+    20%{ opacity:1; transform:scale(1); }
+    100%{ opacity:0; transform:scale(1.25); }
   }
 
   @media (max-width: 430px){
@@ -188,7 +264,7 @@
     #bubble::after{
       width:16px;
       height:16px;
-      bottom:-7px;
+      bottom:-6px;
     }
 
     #bottomUI{
@@ -220,6 +296,14 @@
       <div id="choices"></div>
     </div>
 
+    <div id="sparkle">
+      <div class="spark s1"></div>
+      <div class="spark s2"></div>
+      <div class="spark s3"></div>
+      <div class="spark s4"></div>
+      <div class="spark s5"></div>
+    </div>
+
     <div id="chargeFlash"></div>
   </div>
 
@@ -231,6 +315,8 @@
   const bubbleEl = document.getElementById("bubble");
   const choicesEl = document.getElementById("choices");
   const flashEl = document.getElementById("chargeFlash");
+  const sparkleEl = document.getElementById("sparkle");
+  const bgEl = document.getElementById("bg");
 
   function setMessage(text){
     bubbleEl.textContent = text;
@@ -273,13 +359,24 @@
 
   function playChargeEffect(callback){
     flashEl.classList.remove("on");
+    sparkleEl.classList.remove("on");
+    bubbleEl.classList.remove("charge");
+    bgEl.classList.remove("charge-zoom");
+
     void flashEl.offsetWidth;
+
     flashEl.classList.add("on");
+    sparkleEl.classList.add("on");
+    bubbleEl.classList.add("charge");
+    bgEl.classList.add("charge-zoom");
 
     setTimeout(() => {
       flashEl.classList.remove("on");
+      sparkleEl.classList.remove("on");
+      bubbleEl.classList.remove("charge");
+      bgEl.classList.remove("charge-zoom");
       if(callback) callback();
-    }, 900);
+    }, 1050);
   }
 
   function next(choice){
@@ -296,7 +393,7 @@
       }
 
       if(choice === "tired"){
-        setMessage("そっか…おつかれさま。\nどんな感じ？");
+        setMessage("そっか…おつかれさま。\n今はどれに近い？");
         renderChoices([
           { label:"かなり疲れた", value:"tired_high" },
           { label:"少しだけ", value:"tired_mid" },
@@ -305,7 +402,7 @@
       }
 
       if(choice === "down"){
-        setMessage("それはキツいね。\n今はどれに近い？");
+        setMessage("それはちょっとキツいね。\n今はどんな感じ？");
         renderChoices([
           { label:"結構きつい", value:"down_high" },
           { label:"少しだけ", value:"down_mid" },
@@ -314,7 +411,7 @@
       }
 
       if(choice === "neutral"){
-        setMessage("そっか、来てくれたんだね。\n今日はどれ？");
+        setMessage("そっか、来てくれたんだね。\n今日はどれに近い？");
         renderChoices([
           { label:"なんとなく", value:"neutral_feel" },
           { label:"暇だった", value:"neutral_free" },
@@ -370,26 +467,42 @@
 
   function getFinalMessage(){
     if(mood === "good"){
-      if(detail === "good_high") return "ちゃんといい日になってる。\nそれ、けっこう大事だよ";
-      if(detail === "good_mid") return "いい流れだね。\nそのままで大丈夫";
-      return "少しでも良かったなら充分。\n今日はそれでOK";
+      if(detail === "good_high"){
+        return "ちゃんといい日に\nなってるよ。\nそれ、けっこう大事";
+      }
+      if(detail === "good_mid"){
+        return "いい流れだね。\nそのままで大丈夫";
+      }
+      return "少しでも良かったなら\n今日はそれで充分だよ";
     }
 
     if(mood === "tired"){
-      if(detail === "tired_high") return "今日はこれくらいでいいよ。\nまずはちょっと休も";
-      if(detail === "tired_mid") return "少し疲れた日は、\n少し休めばいいよ";
-      return "大丈夫そうでも、\n少しだけ充電しとこ";
+      if(detail === "tired_high"){
+        return "今日はこれくらいでいいよ。\nまずはちょっと休も";
+      }
+      if(detail === "tired_mid"){
+        return "少し疲れた日は、\n少し休めばいいよ";
+      }
+      return "まだ大丈夫そうでも、\n少しだけ充電しとこ";
     }
 
     if(mood === "down"){
-      if(detail === "down_high") return "ちゃんと来ただけでもえらい。\n今日はそれで十分だよ";
-      if(detail === "down_mid") return "少し落ち込む日もあるよね。\n今は無理しなくていい";
+      if(detail === "down_high"){
+        return "ちゃんと来ただけでもえらい。\n今日はそれで十分だよ";
+      }
+      if(detail === "down_mid"){
+        return "少し落ち込む日もあるよね。\n今は無理しなくていい";
+      }
       return "もう大丈夫でも、\n少しだけ置いていこう";
     }
 
     if(mood === "neutral"){
-      if(detail === "neutral_feel") return "なんとなく来た日にも、\nちゃんと意味あるよ";
-      if(detail === "neutral_free") return "暇な時間に来てくれたの、\nちょっと嬉しい";
+      if(detail === "neutral_feel"){
+        return "なんとなく来た日にも、\nちゃんと意味あるよ";
+      }
+      if(detail === "neutral_free"){
+        return "暇な時間に来てくれたの、\nちょっと嬉しい";
+      }
       return "呼ばれた気がしたなら、\nたぶん来て正解";
     }
 
