@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>チーズ牛丼娘</title>
 
 <style>
@@ -46,9 +46,9 @@
     object-fit:cover;
     object-position:center 35%;
     display:block;
-    animation:zoom 8s ease-in-out infinite alternate;
     background:#000;
-    transition:transform 0.9s ease, filter 0.6s ease, opacity 0.25s ease;
+    animation:zoom 8s ease-in-out infinite alternate;
+    transition:transform 0.8s ease, filter 0.6s ease, opacity 0.25s ease;
   }
 
   .bg.chargeZoom{
@@ -113,7 +113,7 @@
     bottom:calc(16px + env(safe-area-inset-bottom));
     z-index:20;
     padding:0 14px;
-    max-height:45dvh;
+    max-height:46dvh;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
@@ -168,7 +168,12 @@
   .flash{
     position:absolute;
     inset:0;
-    background:radial-gradient(circle at center, rgba(255,245,200,0.55) 0%, rgba(255,235,160,0.18) 30%, rgba(255,255,255,0) 60%);
+    background:radial-gradient(
+      circle at center,
+      rgba(255,240,180,0.70) 0%,
+      rgba(255,220,120,0.28) 35%,
+      rgba(255,255,255,0) 65%
+    );
     opacity:0;
     pointer-events:none;
     z-index:15;
@@ -223,8 +228,8 @@
 
     <div class="bottomArea">
       <div class="buttons">
-        <button onclick="goScreen('charge')">チャージ</button>
-        <button onclick="goScreen('dice')">サイコロ</button>
+        <button onclick="resetCharge()">チャージ</button>
+        <button onclick="resetDice()">サイコロ</button>
         <button onclick="goScreen('special')">特別</button>
       </div>
     </div>
@@ -238,17 +243,7 @@
     <div id="chargeFlash" class="flash"></div>
 
     <div class="bottomArea">
-      <div id="chargeButtons" class="buttons">
-        <div class="row">
-          <button onclick="selectChargeMood('good')">いい日だった</button>
-          <button onclick="selectChargeMood('tired')">ちょっと疲れた</button>
-        </div>
-        <div class="row">
-          <button onclick="selectChargeMood('down')">落ち込んだ</button>
-          <button onclick="selectChargeMood('neutral')">なんでもない</button>
-        </div>
-        <button class="back" onclick="resetCharge()">もどる</button>
-      </div>
+      <div id="chargeButtons" class="buttons"></div>
     </div>
   </section>
 
@@ -259,24 +254,7 @@
     <div id="diceBubble" class="bubble">サイコロを振る？</div>
 
     <div class="bottomArea">
-      <div class="buttons">
-        <button onclick="rollDice()">振る</button>
-        <button class="back" onclick="goScreen('top')">もどる</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- DICE RESULT -->
-  <section id="diceResult" class="screen">
-    <img src="girl_dice.png" alt="サイコロ結果画像" class="bg">
-    <div class="bgShade"></div>
-    <div id="resultBubble" class="bubble">…</div>
-
-    <div class="bottomArea">
-      <div class="buttons">
-        <button onclick="rollDice()">もう一回振る</button>
-        <button class="back" onclick="goScreen('top')">トップへ</button>
-      </div>
+      <div id="diceButtons" class="buttons"></div>
     </div>
   </section>
 
@@ -365,6 +343,9 @@
     document.getElementById(id).classList.add('active');
   }
 
+  /* =========================
+     CHARGE
+  ========================= */
   const chargeData = {
     good: {
       intro: "それはいい日だったね",
@@ -389,7 +370,6 @@
   function resetCharge(){
     currentChargeMood = "";
     document.getElementById("chargeBubble").textContent = "今日はどんな感じ？";
-
     document.getElementById("chargeButtons").innerHTML = `
       <div class="row">
         <button onclick="selectChargeMood('good')">いい日だった</button>
@@ -399,9 +379,8 @@
         <button onclick="selectChargeMood('down')">落ち込んだ</button>
         <button onclick="selectChargeMood('neutral')">なんでもない</button>
       </div>
-      <button class="back" onclick="resetCharge()">もどる</button>
+      <button class="back" onclick="goScreen('top')">もどる</button>
     `;
-
     document.getElementById("chargeBg").classList.remove("chargeZoom");
     goScreen("charge");
   }
@@ -410,7 +389,6 @@
     currentChargeMood = mood;
     document.getElementById("chargeBubble").textContent =
       chargeData[mood].intro + "\n\n…じゃあ、ちょっとだけチャージするね";
-
     document.getElementById("chargeButtons").innerHTML = `
       <button onclick="doCharge()">受け取る</button>
       <button class="back" onclick="resetCharge()">もどる</button>
@@ -439,25 +417,138 @@
     }, 900);
   }
 
-  const diceResults = [
-    "今日はチャージ強め",
-    "今日はゆっくりしよう",
-    "7色チーズ牛丼チャンス",
-    "今日は何も考えない日",
-    "ちょっといいことあるかも",
-    "チー…ギュウ",
-    "特別メニュー日和"
+  /* =========================
+     DICE
+  ========================= */
+  const diceEvents = [
+    {
+      key: "chargeStrong",
+      label: "今日はチャージ強め",
+      intro: "今日はちょっと多めにいくね\n最近、無理してない？",
+      choices: [
+        { text: "してる", result: "じゃあ少しだけ軽くするね\n無理は続けなくていいよ" },
+        { text: "してない", result: "いい感じだね\nこのままいこう" },
+        { text: "わからない", result: "それでも大丈夫\n今ここにいるだけでOK" }
+      ]
+    },
+    {
+      key: "rainbow",
+      label: "7色チーズ牛丼",
+      intro: "今日は特別にこれ\n…ちょっとだけカラフルだけど",
+      choices: [
+        { text: "食べる", result: "意外といけるでしょ\nたぶんね" },
+        { text: "こわい", result: "正直でいいね\n今日はやめとこ" },
+        { text: "なにそれ", result: "深く考えない方がいいよ\nそういう日もある" }
+      ]
+    },
+    {
+      key: "noThink",
+      label: "今日は何も考えない日",
+      intro: "今日はね\n考えなくていい日",
+      choices: [
+        { text: "ほんとに？", result: "ほんとだよ\n今日はそれでいい" },
+        { text: "無理かも", result: "少しだけでもいいよ\n10秒だけ休も" },
+        { text: "いいね", result: "いい選択\n今日はゆるくいこう" }
+      ]
+    },
+    {
+      key: "sweet",
+      label: "甘いもの日和",
+      intro: "今日は甘いものがいい日\n理由はないけどね",
+      choices: [
+        { text: "食べる", result: "正解\nそういう日も必要" },
+        { text: "我慢する", result: "えらいね\nでも無理しすぎないで" },
+        { text: "迷う", result: "じゃあ一口だけ\nそれでいいよ" }
+      ]
+    },
+    {
+      key: "gyu",
+      label: "チー…ギュウ",
+      intro: "今のはちょっと特別\n静かに受け取ってね",
+      choices: [
+        { text: "受け取る", result: "ギュウ" },
+        { text: "なにこれ", result: "説明はしない\nそういうもの" },
+        { text: "もう一回", result: "もう出ないかもね" }
+      ]
+    },
+    {
+      key: "special",
+      label: "特別メニュー発動",
+      intro: "今日はちょっと特別\nどれにする？",
+      choices: [
+        { text: "誕生日", result: "おめでとう\n今日だけ特別ね" },
+        { text: "7色チーズ牛丼", result: "またそれ選ぶんだ…\n好きだね" },
+        { text: "やめとく", result: "それもあり\n無理しないのが一番" }
+      ]
+    }
   ];
 
+  let currentDiceEvent = null;
+  let currentDiceState = "start";
+
+  function resetDice(){
+    currentDiceEvent = null;
+    currentDiceState = "start";
+    document.getElementById("diceBubble").textContent = "サイコロを振る？";
+    document.getElementById("diceButtons").innerHTML = `
+      <button onclick="rollDice()">振る</button>
+      <button class="back" onclick="goScreen('top')">もどる</button>
+    `;
+    goScreen("dice");
+  }
+
   function rollDice(){
-    goScreen('diceResult');
-    const bubble = document.getElementById('resultBubble');
+    goScreen("dice");
+    currentDiceState = "rolling";
+    const bubble = document.getElementById("diceBubble");
+    const buttons = document.getElementById("diceButtons");
+
     bubble.textContent = "コロコロ…";
+    buttons.innerHTML = `
+      <button class="back" onclick="goScreen('top')">トップへ</button>
+    `;
 
     setTimeout(() => {
-      const result = diceResults[Math.floor(Math.random() * diceResults.length)];
-      bubble.textContent = "…出た\n「" + result + "」";
+      currentDiceEvent = diceEvents[Math.floor(Math.random() * diceEvents.length)];
+      bubble.textContent = "…出た\n「" + currentDiceEvent.label + "」";
+      buttons.innerHTML = `
+        <button onclick="startDiceTalk()">つづける</button>
+        <button class="back" onclick="resetDice()">もどる</button>
+      `;
+      currentDiceState = "rolled";
     }, 900);
+  }
+
+  function startDiceTalk(){
+    if(!currentDiceEvent) return;
+
+    const bubble = document.getElementById("diceBubble");
+    const buttons = document.getElementById("diceButtons");
+
+    bubble.textContent = currentDiceEvent.intro;
+    buttons.innerHTML = currentDiceEvent.choices.map((choice, index) => {
+      return `<button onclick="finishDiceTalk(${index})">${choice.text}</button>`;
+    }).join("") + `
+      <button class="back" onclick="resetDice()">もどる</button>
+    `;
+
+    currentDiceState = "talk";
+  }
+
+  function finishDiceTalk(index){
+    if(!currentDiceEvent) return;
+
+    const bubble = document.getElementById("diceBubble");
+    const buttons = document.getElementById("diceButtons");
+    const selected = currentDiceEvent.choices[index];
+
+    bubble.textContent = selected.result;
+    buttons.innerHTML = `
+      <button onclick="rollDice()">もう一回振る</button>
+      <button class="back" onclick="goScreen('top')">トップへ</button>
+    `;
+
+    currentDiceState = "result";
   }
 </script>
 
